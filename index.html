@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <main class="main">
+      <input type="text" placeholder="Enter link" />
+
+      <div class="settings">
+        <div class="settings__item">
+          <input
+            class="checkbox"
+            id="is-playlist"
+            type="checkbox"
+            value="yes"
+          />
+          <label for="is-playlist">Скачать весь плейлист</label>
+        </div>
+        <div class="settings__item">
+          <label for="quality">Качество аудио/видео</label>
+
+          <input
+            class="range"
+            type="range"
+            value="80"
+            min="0"
+            max="100"
+            step="10"
+          />
+          <span class="range-slider__value">0</span>
+        </div>
+        <div class="settings__item">
+          <label for="media-format">Формат</label>
+          <select id="media-format" name="media-format">
+            <option value="mp3">mp3</option>
+            <option value="webm">webm</option>
+            <option value="mp4">mp4</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="loading">
+        <div class="progress"></div>
+      </div>
+
+      <button class="start">Запустить</button>
+    </main>
+  </body>
+</html>
