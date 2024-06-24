@@ -11,38 +11,26 @@ body {
   display: flex;
   flex-direction: column;
   color: #000;
-  height: 600px;
   font-size: 18px;
   line-height: 100%;
-  min-width: 500px;
 }
 
 main {
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-main > div {
-  display: flex;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100%;
 }
 
 .main__inner {
   width: 100%;
   max-width: 850px;
-  min-height: 500px;
 }
 
+/* Settings */
 .settings {
   width: 100%;
   color: #fff;
   user-select: none;
+  gap: 20px;
 }
 
 .settings__item {
@@ -54,6 +42,7 @@ main > div {
   width: 100%;
 }
 
+/* Link */
 .link {
   width: 100%;
 }
@@ -72,16 +61,44 @@ main > div {
   opacity: 1; /* Firefox */
 }
 
+/* Is playlist */
 .is-playlist {
-  margin-left: -10px;
+  margin-left: -9px;
 }
 
 .is-playlist .q-checkbox__bg {
   border: 1.4px solid #fff;
 }
 
-.range {
+/* Quality */
+.quality .range__wrapper {
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.quality .range {
   width: 250px;
+}
+
+@media only screen and (max-width: 550px) {
+  .quality {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .quality .range__wrapper {
+    align-items: center;
+    width: 100%;
+    flex-wrap: nowrap;
+    column-gap: 30px;
+    row-gap: 5px;
+  }
+
+  .quality .range {
+    width: 100%;
+  }
 }
 
 /* Format */
@@ -102,6 +119,15 @@ main > div {
   color: #fff !important;
 }
 
+/* Format select dialog */
+.q-select__dialog label .q-field__control {
+  padding: 10px 20px;
+}
+.q-select__dialog .q-item {
+  padding: 0 20px;
+}
+
+/* Button */
 button.btn {
   color: #fff !important;
   padding: 10px 32px;
