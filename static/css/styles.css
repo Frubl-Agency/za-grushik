@@ -127,6 +127,7 @@ body {
 
 .media-format span {
   color: #fff !important;
+  font-size: 18px;
 }
 
 /* Format select dialog */
@@ -135,6 +136,16 @@ body {
 }
 .q-select__dialog .q-item {
   padding: 0 20px;
+}
+
+/* Path */
+.path {
+  border: 1px solid #2b2f3b;
+  background: #1f222a;
+  border-radius: 2px;
+  padding: 10px 15px;
+  line-height: 100% !important;
+  cursor: pointer;
 }
 
 /* Button */

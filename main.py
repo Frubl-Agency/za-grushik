@@ -65,6 +65,9 @@ with ui.column().classes('main__inner'):
         with ui.row().classes('settings__item'):
             ui.label('Format')
             format_select = ui.select(['mp3', 'webm', 'mp4'], value='mp3').classes('media-format')
+        with ui.row().classes('settings__item'):
+            ui.label('Select a folder for downloading')
+            ui.label('D:/Music/').classes('path')
 
     ui.button('Start', on_click=start_download).classes('btn')
 
