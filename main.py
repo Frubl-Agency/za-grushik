@@ -50,7 +50,7 @@ ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/css/style
 
 # Create a NiceGUI app with custom styling
 with ui.column().classes('main__inner'):
-    ui.colors(primary='#3A8E5C')
+    ui.colors(primary='#7773FE')
 
     url_input = ui.input(placeholder='Enter link').classes('link')
 
