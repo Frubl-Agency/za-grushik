@@ -1,6 +1,7 @@
 import yt_dlp
 from nicegui import ui, app
 from pathlib import Path
+# import webview
 
 def download_playlist(playlist_url, is_playlist, quality, format):
     ydl_opts = {
@@ -38,17 +39,17 @@ def start_download():
 app.add_static_files('/static', str(Path(__file__).parent / "static"))
 
 # Add custom styles
-ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/reset.css">')
-ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/styles.css">')
+ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/css/reset.css">')
+ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/css/styles.css">')
 
 # Create a NiceGUI app with custom styling
-with ui.column().classes('main') as main:
-    ui.colors(primary='#fff')
+with ui.column().classes('main__inner'):
+    ui.colors(primary='#3A8E5C')
 
     url_input = ui.input(placeholder='Enter link').classes('link')
 
     with ui.column().classes('settings') as settings:
-        with ui.row().classes('settings__item'):
+        with ui.row().classes('settings__item is-playlist'):
             playlist_checkbox = ui.checkbox('Download entire playlist').classes('checkbox')
         with ui.row().classes('settings__item'):
             ui.label('Audio/Video Quality')
@@ -58,7 +59,6 @@ with ui.column().classes('main') as main:
             ui.label('Format')
             format_select = ui.select(['mp3', 'webm', 'mp4'], value='mp3').classes('media-format')
 
-
     ui.button('Start', on_click=start_download).classes('btn')
 
-ui.run()
+ui.run(native=True)
