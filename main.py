@@ -4,21 +4,23 @@ from pathlib import Path
 
 def download_playlist(playlist_url, is_playlist, quality, format):
     ydl_opts = {
-        'format': 'bestaudio/best' if format == 'mp3' else format,
-        'extractaudio': True if format == 'mp3' else False,  # only keep the audio if mp3
-        'audioformat': format,  # convert to specified format
-        'audioquality': str(quality),  # specified audio quality
+        'format': 'bestaudio/best',
+        'extractaudio': True,  # only keep the audio
+        'audioformat': 'mp3',  # convert to mp3
+        'audioquality': '0',  # best audio quality
         'outtmpl': r'D:\Music\%(title)s.%(ext)s',  # name the downloaded file
-        'yesplaylist': is_playlist,  # download entire playlist
+        'yesplaylist': True,  # download entire playlist
         'ignoreerrors': True,  # continue on download errors
         'retries': float('inf'),  # retry infinitely on error
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
-            'preferredcodec': format,
-            'preferredquality': str(quality),
-        }] if format == 'mp3' else [],
-        'embedthumbnail': True,  # embed thumbnail
-        'embedmetadata': True,  # embed metadata
+            'preferredcodec': 'mp3',
+            'preferredquality': '0',
+        }, {
+            'key': 'FFmpegMetadata',
+        }],
+        'embedthumbnail': True,  # embed thumbnail in mp3
+        'embedmetadata': True,  # embed metadata in mp3
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -43,8 +45,7 @@ ui.add_head_html('<link rel="stylesheet" type="text/css" href="/static/styles.cs
 with ui.column().classes('main') as main:
     ui.colors(primary='#fff')
 
-    # ui.html('<input type="text" id="url-input" placeholder="Enter link" class="link">')
-    url_input = ui.input(label='Enter link', placeholder='Enter link').classes('link')
+    url_input = ui.input(placeholder='Enter link').classes('link')
 
     with ui.column().classes('settings') as settings:
         with ui.row().classes('settings__item'):
@@ -55,13 +56,8 @@ with ui.column().classes('main') as main:
             ui.label().bind_text_from(quality_slider, 'value').classes('range-slider__value')
         with ui.row().classes('settings__item'):
             ui.label('Format')
-            ui.html('''
-            <select id="media-format" name="media-format" class="media-format">
-                <option value="mp3" selected>mp3</option>
-                <option value="webm">webm</option>
-                <option value="mp4">mp4</option>
-            </select>
-            ''')
+            format_select = ui.select(['mp3', 'webm', 'mp4'], value='mp3').classes('media-format')
+
 
     ui.button('Start', on_click=start_download).classes('btn')
 

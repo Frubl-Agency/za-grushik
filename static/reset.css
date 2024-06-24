@@ -70,6 +70,27 @@ button {
 }
 
 /* NiceGui reset */
-.btn::before {
+button {
+  padding: 0;
+  min-height: auto;
+  flex-direction: row;
+  font-weight: unset;
+  vertical-align: unset;
+  border-radius: 0;
+  font-size: inherit;
+  line-height: 100%;
+  text-transform: capitalize;
+}
+
+.q-field__control:after {
   content: none;
+}
+
+*::before,
+*::after {
+  content: none !important;
+}
+
+.link .row {
+  height: auto;
 }
