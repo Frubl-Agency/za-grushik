@@ -115,18 +115,19 @@ body {
 .media-format {
   border: 1px solid #2b2f3b;
   background: #1f222a;
-  border-radius: 2px;
-  padding: 10px 15px;
+  border-radius: 5px;
   line-height: 100% !important;
   cursor: pointer;
 }
 
-.media-format .q-field__append {
-  display: none;
+.media-format .q-btn {
+  padding: 4px 16px;
+  text-transform: capitalize;
 }
 
 .media-format span {
   color: #fff !important;
+  line-height: 100% !important;
   font-size: 16px;
 }
 

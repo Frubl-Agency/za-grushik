@@ -19,36 +19,52 @@ class LogCapture(io.StringIO):
     def flush(self):
         pass
 
-def download_playlist(playlist_url):
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'extractaudio': True,  # only keep the audio
-        'audioformat': 'mp3',  # convert to mp3
-        'audioquality': '0',  # best audio quality
-        'outtmpl': r'D:\Music\%(title)s.%(ext)s',  # name the downloaded file
-        'yesplaylist': True,  # download entire playlist
-        'ignoreerrors': True,  # continue on download errors
-        'retries': float('inf'),  # retry infinitely on error
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '0',
-        }, {
-            'key': 'FFmpegMetadata',
-        }],
-        'embedthumbnail': True,  # embed thumbnail in mp3
-        'embedmetadata': True,  # embed metadata in mp3
-    }
+def download_playlist(playlist_url, is_music):
+    if is_music:
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'extractaudio': True,  # only keep the audio
+            'audioformat': 'mp3',  # convert to mp3
+            'audioquality': '0',  # best audio quality
+            'outtmpl': r'D:\Music\%(title)s.%(ext)s',  # name the downloaded file
+            'yesplaylist': True,  # download entire playlist
+            'ignoreerrors': True,  # continue on download errors
+            'retries': float('inf'),  # retry infinitely on error
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '0',
+            }, {
+                'key': 'FFmpegMetadata',
+            }],
+            'embedthumbnail': True,  # embed thumbnail in mp3
+            'embedmetadata': True,  # embed metadata in mp3
+        }
+    else:
+        ydl_opts = {
+            'format': 'bestvideo+bestaudio/best',
+            'outtmpl': r'D:\Music\%(title)s.%(ext)s',  # name the downloaded file
+            'ignoreerrors': True,  # continue on download errors
+            'retries': float('inf'),  # retry infinitely on error
+            'postprocessors': [{
+                'key': 'FFmpegVideoConvertor',
+            }],
+            'embedthumbnail': True,  # embed thumbnail in mp4
+            'embedmetadata': True,  # embed metadata in mp4
+        }
+
+    print(f"Downloading playlist from URL: {playlist_url} with options: {ydl_opts}")
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([playlist_url])
 
 def start_download():
     playlist_url = url_input.value
+    is_music = format_select.value == 1
     ui.notify(f'Started downloading')
 
     # Start download in a separate thread to avoid blocking the UI
-    download_thread = threading.Thread(target=download_playlist, args=(playlist_url,))
+    download_thread = threading.Thread(target=download_playlist, args=(playlist_url, is_music))
     download_thread.start()
 
 # Serve static files
@@ -69,7 +85,7 @@ with ui.column().classes('main__inner'):
             playlist_checkbox = ui.checkbox('Download entire playlist').classes('checkbox')
         with ui.row().classes('settings__item'):
             ui.label('Format')
-            format_select = ui.select(['mp3', 'webm', 'mp4'], value='mp3').classes('media-format')
+            format_select = ui.toggle({1: 'Music', 2: 'Video'}, value=1).classes('media-format')
         with ui.row().classes('settings__item'):
             ui.label('Select a folder for downloading')
             ui.label('D:/Music/').classes('path')
