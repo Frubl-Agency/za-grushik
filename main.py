@@ -1,45 +1,55 @@
 import yt_dlp
 from nicegui import ui, app
 from pathlib import Path
+import sys
+import threading
+import io
 
-def download_playlist(playlist_url, is_playlist, quality, format):
+# Redirect stdout to capture yt_dlp logs
+class LogCapture(io.StringIO):
+    def __init__(self, ui_log):
+        super().__init__()
+        self.ui_log = ui_log
+
+    def write(self, message):
+        super().write(message)
+        self.ui_log.push(message)
+        sys.__stdout__.write(message)
+
+    def flush(self):
+        pass
+
+def download_playlist(playlist_url):
     ydl_opts = {
-        'format': 'bestvideo+bestaudio/best',  # download best video+audio format
+        'format': 'bestaudio/best',
+        'extractaudio': True,  # only keep the audio
+        'audioformat': 'mp3',  # convert to mp3
+        'audioquality': '0',  # best audio quality
         'outtmpl': r'D:\Music\%(title)s.%(ext)s',  # name the downloaded file
+        'yesplaylist': True,  # download entire playlist
         'ignoreerrors': True,  # continue on download errors
         'retries': float('inf'),  # retry infinitely on error
         'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '0',
+        }, {
             'key': 'FFmpegMetadata',
         }],
-        'embedthumbnail': True,  # embed thumbnail if possible
-        'embedmetadata': True,  # embed metadata if possible
-        'yesplaylist': is_playlist  # download entire playlist if is_playlist is True
+        'embedthumbnail': True,  # embed thumbnail in mp3
+        'embedmetadata': True,  # embed metadata in mp3
     }
-
-    if format == 'mp3':
-        ydl_opts.update({
-            'format': 'bestaudio/best',
-            'extractaudio': True,  # only keep the audio
-            'audioformat': format,  # convert to the chosen format
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': format,
-                'preferredquality': '0',
-            }, {
-                'key': 'FFmpegMetadata',
-            }],
-        })
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([playlist_url])
 
 def start_download():
     playlist_url = url_input.value
-    is_playlist = playlist_checkbox.value
-    quality = int(quality_slider.value)
-    format = format_select.value
-    download_playlist(playlist_url, is_playlist, quality, format)
-    ui.notify(f'Started downloading from URL: {playlist_url} with format: {format} and quality: {quality}')
+    ui.notify(f'Started downloading')
+
+    # Start download in a separate thread to avoid blocking the UI
+    download_thread = threading.Thread(target=download_playlist, args=(playlist_url,))
+    download_thread.start()
 
 # Serve static files
 app.add_static_files('/static', str(Path(__file__).parent / "static"))
@@ -60,7 +70,7 @@ with ui.column().classes('main__inner'):
         with ui.row().classes('settings__item quality'):
             ui.label('Audio/Video Quality')
             with ui.row().classes('range__wrapper'):
-                quality_slider = ui.slider(min=0, max=100, step=10, value=80).classes('range')
+                quality_slider = ui.slider(min=0, max=100, step=10, value=100).classes('range')
                 ui.label().bind_text_from(quality_slider, 'value').classes('range-slider__value')
         with ui.row().classes('settings__item'):
             ui.label('Format')
@@ -68,6 +78,9 @@ with ui.column().classes('main__inner'):
         with ui.row().classes('settings__item'):
             ui.label('Select a folder for downloading')
             ui.label('D:/Music/').classes('path')
+
+    log_area = ui.log().classes('log-area')
+    sys.stdout = LogCapture(log_area)  # Redirect stdout to log_area
 
     ui.button('Start', on_click=start_download).classes('btn')
 
