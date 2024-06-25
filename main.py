@@ -4,22 +4,30 @@ from pathlib import Path
 import sys
 import threading
 import io
+import re
 
 # Redirect stdout to capture yt_dlp logs
 class LogCapture(io.StringIO):
-    def __init__(self, ui_log):
+    def __init__(self, ui_log, progress_bar):
         super().__init__()
         self.ui_log = ui_log
+        self.progress_bar = progress_bar
+        self.percentage_pattern = re.compile(r'\[download\]\s+(\d+\.\d+)%')
 
     def write(self, message):
         super().write(message)
         self.ui_log.push(message)
         sys.__stdout__.write(message)
+        
+        match = self.percentage_pattern.search(message)
+        if match:
+            percentage = float(match.group(1)) / 100
+            self.progress_bar.set_value(percentage)
 
     def flush(self):
         pass
 
-def download_playlist(playlist_url, is_music):
+def download_playlist(playlist_url, is_music, progress_bar):
     if is_music:
         ydl_opts = {
             'format': 'bestaudio/best',
@@ -53,8 +61,6 @@ def download_playlist(playlist_url, is_music):
             'embedmetadata': True,  # embed metadata in mp4
         }
 
-    print(f"Downloading playlist from URL: {playlist_url} with options: {ydl_opts}")
-
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([playlist_url])
 
@@ -64,7 +70,7 @@ def start_download():
     ui.notify(f'Started downloading')
 
     # Start download in a separate thread to avoid blocking the UI
-    download_thread = threading.Thread(target=download_playlist, args=(playlist_url, is_music))
+    download_thread = threading.Thread(target=download_playlist, args=(playlist_url, is_music, progress_bar))
     download_thread.start()
 
 # Serve static files
@@ -91,7 +97,8 @@ with ui.column().classes('main__inner'):
             ui.label('D:/Music/').classes('path')
 
     log_area = ui.log().classes('log-area')
-    sys.stdout = LogCapture(log_area)  # Redirect stdout to log_area
+    progress_bar = ui.linear_progress().classes('progress-bar')
+    sys.stdout = LogCapture(log_area, progress_bar)  # Redirect stdout to log_area and progress_bar
 
     ui.button('Start', on_click=start_download).classes('btn')
 
