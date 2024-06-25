@@ -67,11 +67,6 @@ with ui.column().classes('main__inner'):
     with ui.column().classes('settings') as settings:
         with ui.row().classes('settings__item is-playlist'):
             playlist_checkbox = ui.checkbox('Download entire playlist').classes('checkbox')
-        with ui.row().classes('settings__item quality'):
-            ui.label('Audio/Video Quality')
-            with ui.row().classes('range__wrapper'):
-                quality_slider = ui.slider(min=0, max=100, step=10, value=100).classes('range')
-                ui.label().bind_text_from(quality_slider, 'value').classes('range-slider__value')
         with ui.row().classes('settings__item'):
             ui.label('Format')
             format_select = ui.select(['mp3', 'webm', 'mp4'], value='mp3').classes('media-format')
