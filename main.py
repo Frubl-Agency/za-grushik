@@ -28,51 +28,42 @@ class LogCapture(io.StringIO):
         
         song_match = self.song_number_pattern.search(message)
         if song_match:
-            current_song = song_match.group(1)
-            total_songs = song_match.group(2)
+            current_song, total_songs = song_match.groups()
             self.current_song_label.set_text(f"{current_song} of {total_songs}")
 
     def flush(self):
         pass
 
 def download_playlist(playlist_url, is_music, download_entire_playlist, progress_bar, current_song_label):
-    ydl_opts = {}
+    common_opts = {
+        'outtmpl': r'D:\Music\%(title)s.%(ext)s',
+        'ignoreerrors': True,
+        'retries': float('inf'),
+        'embedthumbnail': True,
+        'embedmetadata': True,
+    }
+
     if is_music:
         ydl_opts = {
+            **common_opts,
             'format': 'bestaudio/best',
-            'extractaudio': True,  # only keep the audio
-            'audioformat': 'mp3',  # convert to mp3
-            'audioquality': '0',  # best audio quality
-            'outtmpl': r'D:\Music\%(title)s.%(ext)s',  # name the downloaded file
-            'ignoreerrors': True,  # continue on download errors
-            'retries': float('inf'),  # retry infinitely on error
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '0',
-            }, {
-                'key': 'FFmpegMetadata',
-            }],
-            'embedthumbnail': True,  # embed thumbnail in mp3
-            'embedmetadata': True,  # embed metadata in mp3
+            'extractaudio': True,
+            'audioformat': 'mp3',
+            'audioquality': '0',
+            'postprocessors': [
+                {'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '0'},
+                {'key': 'FFmpegMetadata'}
+            ],
+            'yesplaylist': download_entire_playlist,
+            'noplaylist': not download_entire_playlist,
         }
-        if download_entire_playlist:
-            ydl_opts['yesplaylist'] = True  # download entire playlist
-        else:
-            ydl_opts['noplaylist'] = True  # download only single video
     else:
         ydl_opts = {
+            **common_opts,
             'format': 'bestvideo+bestaudio/best',
-            'outtmpl': r'D:\Music\%(title)s.%(ext)s',  # name the downloaded file
-            'ignoreerrors': True,  # continue on download errors
-            'retries': float('inf'),  # retry infinitely on error
-            'postprocessors': [{
-                'key': 'FFmpegVideoConvertor',
-            }],
-            'embedthumbnail': True,  # embed thumbnail in mp4
-            'embedmetadata': True,  # embed metadata in mp4
+            'postprocessors': [{'key': 'FFmpegVideoConvertor'}],
+            'noplaylist': True,
         }
-        ydl_opts['noplaylist'] = True  # always download only single video for video format
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([playlist_url])
@@ -87,9 +78,7 @@ def start_download():
     current_song_label.set_text('')  # Reset current song label
     ui.notify('Started downloading')
 
-    # Start download in a separate thread to avoid blocking the UI
-    download_thread = threading.Thread(target=download_playlist, args=(playlist_url, is_music, download_entire_playlist, progress_bar, current_song_label))
-    download_thread.start()
+    threading.Thread(target=download_playlist, args=(playlist_url, is_music, download_entire_playlist, progress_bar, current_song_label)).start()
 
 # Serve static files
 app.add_static_files('/static', str(Path(__file__).parent / "static"))
@@ -105,8 +94,7 @@ with ui.column().classes('main__inner'):
     url_input = ui.input(placeholder='Enter link').classes('link')
 
     with ui.column().classes('settings') as settings:
-        is_playlist = ui.row().classes('settings__item is-playlist')
-        with is_playlist:
+        with ui.row().classes('settings__item is-playlist') as is_playlist:
             playlist_checkbox = ui.checkbox('Download entire playlist').classes('checkbox')
         with ui.row().classes('settings__item'):
             ui.label('Format')
@@ -115,18 +103,15 @@ with ui.column().classes('main__inner'):
             ui.label('Select a folder for downloading')
             ui.label('D:/Music/').classes('path')
 
-        # Add this inside the 'with ui.column().classes('settings') as settings' block
-        def notify_format_change():
-            format_value = format_select.value
-            if format_value == 2:
+        def playlist_disable():
+            if format_select.value == 2:
                 is_playlist.classes('disable')
             else:
                 is_playlist.classes(remove='disable')
 
         # Add the event listener for format_select value change
-        format_select.on('update:model-value', notify_format_change)
+        format_select.on('update:model-value', playlist_disable)
 
-    
     with ui.row().classes('progress-bar__wrapper'):
         current_song_label = ui.label().classes('current-song-label')
         progress_bar = ui.linear_progress(show_value=False).classes('progress-bar')
