@@ -105,7 +105,8 @@ with ui.column().classes('main__inner'):
     url_input = ui.input(placeholder='Enter link').classes('link')
 
     with ui.column().classes('settings') as settings:
-        with ui.row().classes('settings__item is-playlist'):
+        is_playlist = ui.row().classes('settings__item is-playlist')
+        with is_playlist:
             playlist_checkbox = ui.checkbox('Download entire playlist').classes('checkbox')
         with ui.row().classes('settings__item'):
             ui.label('Format')
@@ -113,6 +114,18 @@ with ui.column().classes('main__inner'):
         with ui.row().classes('settings__item'):
             ui.label('Select a folder for downloading')
             ui.label('D:/Music/').classes('path')
+
+        # Add this inside the 'with ui.column().classes('settings') as settings' block
+        def notify_format_change():
+            format_value = format_select.value
+            if format_value == 2:
+                is_playlist.classes('disable')
+            else:
+                is_playlist.classes(remove='disable')
+
+        # Add the event listener for format_select value change
+        format_select.on('update:model-value', notify_format_change)
+
     
     with ui.row().classes('progress-bar__wrapper'):
         current_song_label = ui.label().classes('current-song-label')

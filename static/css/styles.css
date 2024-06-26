@@ -76,39 +76,13 @@ body {
   border: 1.4px solid #fff;
 }
 
-/* Quality */
-.quality .range__wrapper {
-  align-items: center;
-  flex-wrap: nowrap;
+.is-playlist.disable {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
-.quality .range {
-  width: 250px;
-}
-
-.quality .range .q-slider__inner {
-  background: #fff;
-}
-
-@media only screen and (max-width: 550px) {
-  .quality {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
-
-  .quality .range__wrapper {
-    align-items: center;
-    width: 100%;
-    flex-wrap: nowrap;
-    column-gap: 30px;
-    row-gap: 5px;
-  }
-
-  .quality .range {
-    width: 100%;
-  }
+.is-playlist.disable .checkbox {
+  pointer-events: none;
 }
 
 /* Format */
