@@ -117,3 +117,9 @@ button.btn {
 img {
   pointer-events: none;
 }
+
+.q-focusable:focus > .q-focus-helper,
+.q-hoverable:hover > .q-focus-helper,
+.q-manual-focusable--focused > .q-focus-helper {
+  background: none !important;
+}

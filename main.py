@@ -63,10 +63,13 @@ def download_playlist(playlist_url, is_music, progress_bar):
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([playlist_url])
+    
+    ui.notify('Download finished')  # Notify when the download is finished
 
 def start_download():
     playlist_url = url_input.value
     is_music = format_select.value == 1
+    progress_bar.set_value(0)  # Reset progress bar to 0
     ui.notify(f'Started downloading')
 
     # Start download in a separate thread to avoid blocking the UI
@@ -95,11 +98,28 @@ with ui.column().classes('main__inner'):
         with ui.row().classes('settings__item'):
             ui.label('Select a folder for downloading')
             ui.label('D:/Music/').classes('path')
+    
+    
+    progress_bar = ui.linear_progress(show_value=False).classes('progress-bar')
 
     log_area = ui.log().classes('log-area')
-    progress_bar = ui.linear_progress().classes('progress-bar')
-    sys.stdout = LogCapture(log_area, progress_bar)  # Redirect stdout to log_area and progress_bar
+    log_area.visible = False
 
-    ui.button('Start', on_click=start_download).classes('btn')
+    # Define a function to toggle the visibility of log_area
+    def toggle_log_area():
+        log_area.visible = not log_area.visible
+
+    sys.stdout = LogCapture(log_area, progress_bar)  # Redirect stdout to log_area and progress_bar
+    
+
+    with ui.row().classes('buttons'):
+        ui.button('Start', on_click=start_download).classes('btn')
+        ui.button('Advanced settings', icon='settings').classes('btn advanced-settings').on('click', toggle_log_area)
+
+    
+
+
+
+
 
 ui.run(native=True)
