@@ -27,7 +27,8 @@ class LogCapture(io.StringIO):
     def flush(self):
         pass
 
-def download_playlist(playlist_url, is_music, progress_bar):
+def download_playlist(playlist_url, is_music, download_entire_playlist, progress_bar):
+    ydl_opts = {}
     if is_music:
         ydl_opts = {
             'format': 'bestaudio/best',
@@ -35,7 +36,6 @@ def download_playlist(playlist_url, is_music, progress_bar):
             'audioformat': 'mp3',  # convert to mp3
             'audioquality': '0',  # best audio quality
             'outtmpl': r'D:\Music\%(title)s.%(ext)s',  # name the downloaded file
-            'yesplaylist': True,  # download entire playlist
             'ignoreerrors': True,  # continue on download errors
             'retries': float('inf'),  # retry infinitely on error
             'postprocessors': [{
@@ -48,6 +48,10 @@ def download_playlist(playlist_url, is_music, progress_bar):
             'embedthumbnail': True,  # embed thumbnail in mp3
             'embedmetadata': True,  # embed metadata in mp3
         }
+        if download_entire_playlist:
+            ydl_opts['yesplaylist'] = True  # download entire playlist
+        else:
+            ydl_opts['noplaylist'] = True  # download only single video
     else:
         ydl_opts = {
             'format': 'bestvideo+bestaudio/best',
@@ -60,6 +64,7 @@ def download_playlist(playlist_url, is_music, progress_bar):
             'embedthumbnail': True,  # embed thumbnail in mp4
             'embedmetadata': True,  # embed metadata in mp4
         }
+        ydl_opts['noplaylist'] = True  # always download only single video for video format
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([playlist_url])
@@ -69,11 +74,12 @@ def download_playlist(playlist_url, is_music, progress_bar):
 def start_download():
     playlist_url = url_input.value
     is_music = format_select.value == 1
+    download_entire_playlist = is_music and playlist_checkbox.value
     progress_bar.set_value(0)  # Reset progress bar to 0
-    ui.notify(f'Started downloading')
+    ui.notify('Started downloading')
 
     # Start download in a separate thread to avoid blocking the UI
-    download_thread = threading.Thread(target=download_playlist, args=(playlist_url, is_music, progress_bar))
+    download_thread = threading.Thread(target=download_playlist, args=(playlist_url, is_music, download_entire_playlist, progress_bar))
     download_thread.start()
 
 # Serve static files
@@ -99,7 +105,6 @@ with ui.column().classes('main__inner'):
             ui.label('Select a folder for downloading')
             ui.label('D:/Music/').classes('path')
     
-    
     progress_bar = ui.linear_progress(show_value=False).classes('progress-bar')
 
     log_area = ui.log().classes('log-area')
@@ -111,15 +116,8 @@ with ui.column().classes('main__inner'):
 
     sys.stdout = LogCapture(log_area, progress_bar)  # Redirect stdout to log_area and progress_bar
     
-
     with ui.row().classes('buttons'):
         ui.button('Start', on_click=start_download).classes('btn')
         ui.button('Advanced settings', icon='settings').classes('btn advanced-settings').on('click', toggle_log_area)
-
-    
-
-
-
-
 
 ui.run(native=True)
