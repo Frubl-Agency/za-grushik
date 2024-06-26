@@ -226,6 +226,13 @@ button.btn {
   );
 }
 
+/* Progress bar */
+.progress-bar__wrapper {
+  width: 100%;
+  justify-content: flex-end;
+  position: relative;
+}
+
 .progress-bar {
   height: 20px;
   border-radius: 2px;
@@ -239,4 +246,12 @@ button.btn {
     rgba(119, 115, 254, 1) 100%
   );
   transition: 2s;
+}
+
+.progress-bar__wrapper .current-song-label {
+  color: #fff;
+  font-size: 14px;
+  position: absolute;
+  top: -25px;
+  right: 3px;
 }
