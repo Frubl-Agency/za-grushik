@@ -34,9 +34,9 @@ class LogCapture(io.StringIO):
     def flush(self):
         pass
 
-def download_playlist(playlist_url, is_music, download_entire_playlist, progress_bar, current_song_label):
+def download_playlist(playlist_url, is_music, download_entire_playlist, download_path, progress_bar, current_song_label):
     common_opts = {
-        'outtmpl': r'D:\Music\%(title)s.%(ext)s',
+        'outtmpl': str(Path(download_path) / '%(title)s.%(ext)s'),
         'ignoreerrors': True,
         'retries': float('inf'),
         'embedthumbnail': True,
@@ -74,11 +74,12 @@ def start_download():
     playlist_url = url_input.value
     is_music = format_select.value == 1
     download_entire_playlist = is_music and playlist_checkbox.value
+    download_path = path_input.value
     progress_bar.set_value(0)  # Reset progress bar to 0
     current_song_label.set_text('')  # Reset current song label
     ui.notify('Started downloading')
 
-    threading.Thread(target=download_playlist, args=(playlist_url, is_music, download_entire_playlist, progress_bar, current_song_label)).start()
+    threading.Thread(target=download_playlist, args=(playlist_url, is_music, download_entire_playlist, download_path, progress_bar, current_song_label)).start()
 
 # Serve static files
 app.add_static_files('/static', str(Path(__file__).parent / "static"))
@@ -100,8 +101,8 @@ with ui.column().classes('main__inner'):
             ui.label('Format')
             format_select = ui.toggle({1: 'Music', 2: 'Video'}, value=1).classes('media-format')
         with ui.row().classes('settings__item'):
-            ui.label('Select a folder for downloading')
-            ui.label('D:/Music/').classes('path')
+            ui.label('Enter the path to save the files')
+            path_input = ui.input(placeholder='Enter path').classes('path')
 
         def playlist_disable():
             if format_select.value == 2:
